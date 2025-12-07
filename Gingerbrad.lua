@@ -10,7 +10,7 @@ local hrp = character:WaitForChild("HumanoidRootPart")
 
 
 
--- GUI
+
 local sg = Instance.new("ScreenGui")
 sg.Name = "PenguinStumblerV4"
 sg.ResetOnSpawn = false
@@ -47,12 +47,12 @@ Instance.new("UICorner", btn).CornerRadius = UDim.new(0,10)
 
 
 
--- Variablen
+
 local running = false
 local connection
 local targetPenguin = nil
 
--- Nächsten Penguin finden (suche tief im Workspace)
+
 local function findPenguin()
     local best = nil
     local bestDist = math.huge
@@ -71,7 +71,7 @@ local function findPenguin()
     return best
 end
 
--- Start Stolpern (Penguin teleportiert dauerhaft zum Spieler)
+
 btn.MouseButton1Click:Connect(function()
     running = not running
     btn.Text = running and "STOP STRUMBLE" or "START STRUMBLE"
@@ -88,7 +88,7 @@ btn.MouseButton1Click:Connect(function()
             return
         end
 
-        -- Penguin unsichtbar machen
+   
         for _, part in targetPenguin.model:GetDescendants() do
             if part:IsA("BasePart")  then
                 part.Transparency = 1
@@ -101,7 +101,7 @@ btn.MouseButton1Click:Connect(function()
         end
 
 
-        -- Dauer-Teleport-Loop: Penguin vor deine Füße
+ 
         connection = RunService.Heartbeat:Connect(function()
             if targetPenguin and targetPenguin.root and targetPenguin.root.Parent then
                 targetPenguin.root.CFrame = hrp.CFrame * CFrame.new(0, -2, -1.5)  -- Direkt vor deine Füße (anpassen bei Bedarf)
@@ -109,10 +109,10 @@ btn.MouseButton1Click:Connect(function()
         end)
 
     else
-        -- Stoppen
+
         if connection then connection:Disconnect() end
         if targetPenguin then
-            -- Penguin sichtbar machen (optional)
+
             for _, part in targetPenguin.model:GetDescendants() do
                 if part:IsA("BasePart") then
                     part.Transparency = 0
@@ -127,21 +127,12 @@ btn.MouseButton1Click:Connect(function()
     end
 end)
 
-
-
--- Character respawn handling
 player.CharacterAdded:Connect(function(newChar)
     character = newChar
     hrp = newChar:WaitForChild("HumanoidRootPart")
 end)
 
-
-
-
--------------------------------------------------------------------------------------------------------------
-
-
--- GingerbreadFarm V6 - FINAL & PERFEKT (Changelog + langsame Texte)
+-----------------------------------------------------------------------------------------------------------
 
 repeat task.wait() until game:IsLoaded()
 
@@ -156,7 +147,7 @@ local lastRigCount = 0
 local countLabel
 local lastTextUpdate = 0
 
--- Rig-Suche
+
 local function getRigs()
     local rigs = {}
     local christmas = workspace:FindFirstChild("Interiors") and workspace.Interiors:FindFirstChild("MainMap!Christmas")
@@ -194,7 +185,7 @@ local function startWaitingAnim()
     end)
 end
 
--- Hauptloop
+
 _G.GfarmLoop = task.spawn(function()
     while true do
         task.wait(0.15)
@@ -207,13 +198,13 @@ _G.GfarmLoop = task.spawn(function()
         local rigs = getRigs()
         local current = #rigs
 
-        -- ECHTER Collected Counter
+      
         if current < lastRigCount then
             collected = collected + (lastRigCount - current)
         end
         lastRigCount = current
 
-        -- Langsame, lesbare Updates (nur alle 0.7s)
+       
         if tick() - lastTextUpdate >= 0.7 then
             countLabel.Text = "Left: " .. current .. " | Collected: " .. collected
             lastTextUpdate = tick()
@@ -237,26 +228,110 @@ _G.GfarmLoop = task.spawn(function()
         end
     end
 end)
+--------------------------------------------------------------------------------
+local TweenService = game:GetService("TweenService")
 
--- GUI
+local frame = MAINFRAME
+
+local isCollapsed = false
+local isAnimating = false
+local originalSize = frame.Size
+
+local function setChildrenVisible(state)
+    for _, obj in ipairs(frame:GetChildren()) do
+        if obj:IsA("GuiObject") then
+            obj.Visible = state
+        end
+    end
+end
+
+
+local closeE = Instance.new("TextButton", sg)
+closeE.Size = UDim2.new(0, 50, 0, 50)
+closeE.Position = UDim2.new(1, -480, 0, 76)
+closeE.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
+closeE.Text = "⬆️"
+closeE.ZIndex = 1
+closeE.TextSize = 20
+closeE.Active = true; closeE.Draggable = true
+closeE.TextColor3 = Color3.new(1,1,1)
+
+local function AnimateFrame(isClosing)
+    isAnimating = true
+
+    local goal = {}
+
+    if isClosing then
+	closeE.Text = "⬇️"
+	setChildrenVisible(false)
+        originalSize = frame.Size
+        goal.Size = UDim2.new(frame.Size.X.Scale, frame.Size.X.Offset, 0, 0)
+    else
+	closeE.Text = "⬆️"
+        goal.Size = originalSize
+    end
+
+    local tween = TweenService:Create(frame, TweenInfo.new(0.25, Enum.EasingStyle.Quint), goal)
+    tween:Play()
+
+    tween.Completed:Wait()
+
+
+    if isClosing then
+        setChildrenVisible(false)
+    else
+        setChildrenVisible(true)
+    end
+
+    isAnimating = false
+end
+
+
+
+closeE.MouseButton1Click:Connect(function()
+
+    if isAnimating then
+        return  
+    end
+
+    if not isCollapsed then
+
+        AnimateFrame(true)
+    else
+    
+        AnimateFrame(false)
+    end
+
+    isCollapsed = not isCollapsed
+end)
 
 local frame = Instance.new("Frame", MAINFRAME)
 frame.Size = UDim2.new(0, 350, 0, 180)
-frame.Position = UDim2.new(0.9, -375, 0, 80)
+frame.Position = UDim2.new(.9, -375, 0, 80)
 frame.BackgroundColor3 = Color3.fromRGB(10,10,20)
 frame.BorderSizePixel = 0
  
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0,12)
 
 local title = Instance.new("TextLabel", MAINFRAME)
-title.Position = UDim2.new(0.4, -180, 0, 10)
-title.Size = UDim2.new(0.8,0,0,30)
+title.Position = UDim2.new(0.4, -170, 0, 0)
+title.Size = UDim2.new(.7,0,0,35)
 title.BackgroundColor3 = Color3.fromRGB(10,10,20)
 title.Text = "GingerbreadFarm V1"
 title.TextColor3 = Color3.new(1,1,1)
 title.TextScaled = true
 title.Font = Enum.Font.GothamBold
 Instance.new("UICorner", title).CornerRadius = UDim.new(0,12)
+
+local MADEBYME = Instance.new("TextLabel", MAINFRAME)
+MADEBYME.Position = UDim2.new(0.5, -170, 0, 60)
+MADEBYME.Size = UDim2.new(.7,0,0,35)
+MADEBYME.BackgroundColor3 = Color3.fromRGB(10,10,20)
+MADEBYME.Text = "Script made by m5t5"
+MADEBYME.TextColor3 = Color3.new(1,1,1)
+MADEBYME.TextScaled = true
+MADEBYME.Font = Enum.Font.GothamBold
+Instance.new("UICorner", MADEBYME).CornerRadius = UDim.new(0,12)
 
 local startBtn = Instance.new("TextButton", frame)
 startBtn.Size = UDim2.new(0, 270, 0, 50)
@@ -287,8 +362,6 @@ close.TextSize = 	20
 close.TextColor3 = Color3.new(1,1,1)
 Instance.new("UICorner", close).CornerRadius = UDim.new(0,10)
 
-
-
 local infoBtn = Instance.new("TextButton", MAINFRAME)
 infoBtn.Size = UDim2.new(0,50,0,50)
 infoBtn.Position = UDim2.new(1,-115,0,5)
@@ -299,13 +372,13 @@ infoBtn.ZIndex = 5
 infoBtn.TextColor3 = Color3.new(1,1,1)
 Instance.new("UICorner", infoBtn).CornerRadius = UDim.new(0,10)
 
--- Info-Panel mit Changelog
 local info = Instance.new("Frame", sg)
-info.Size = UDim2.new(0,520,0,460)
+info.Size = UDim2.new(0, 480, 0, 390)
 info.Position = UDim2.new(0.5,-260,0.5,-230)
 info.BackgroundColor3 = Color3.fromRGB(10,10,10)
 info.Visible = false
 info.Active = true
+info.ZIndex = 7
 info.Draggable = true
 Instance.new("UICorner", info).CornerRadius = UDim.new(0,12)
 
@@ -315,12 +388,14 @@ infotitle.BackgroundColor3 = Color3.fromRGB(30,30,40)
 infotitle.Text = "Changelog / Features"
 infotitle.TextColor3 = Color3.new(1,1,1)
 infotitle.TextScaled = true
+infotitle.ZIndex = 8
 infotitle.Font = Enum.Font.GothamBold
 Instance.new("UICorner", infotitle).CornerRadius = UDim.new(0,12)
 
 local changelog = Instance.new("TextLabel", info)
 changelog.Size = UDim2.new(1,-20,1,-50)
 changelog.Position = UDim2.new(0,10,0,45)
+changelog.ZIndex = 8
 changelog.BackgroundTransparency = 1
 changelog.Text = [[
 	-------------------------------------
@@ -338,7 +413,6 @@ changelog.TextXAlignment = Enum.TextXAlignment.Left
 changelog.TextYAlignment = Enum.TextYAlignment.Top
 changelog.Font = Enum.Font.Gotham
 
--- START-Button
 local running = false
 startBtn.MouseButton1Click:Connect(function()
     running = not running
@@ -372,6 +446,5 @@ infoBtn.MouseButton1Click:Connect(function() info.Visible = not info.Visible end
 infoclose.MouseButton1Click:Connect(function() info.Visible = false end)
 
 print("Gingerbread Farm lOADED !")
-
 
 
