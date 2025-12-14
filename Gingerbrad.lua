@@ -89,7 +89,7 @@ btn.MouseButton1Click:Connect(function()
         end
 
    
-        for _, part in targetPenguin.model:GetDescendants() do
+        for _, part in targetPenguin.model:GetChildren() do
             if part:IsA("BasePart")  then
                 part.Transparency = 1
                 part.CanCollide = false
@@ -117,7 +117,7 @@ btn.MouseButton1Click:Connect(function()
                 if part:IsA("BasePart") then
                     part.Transparency = 0
                     part.CanCollide = true
-                elseif part:IsA("Decal") or part:IsA("Texture") then
+                elseif part:IsA("Decal") then
                     part.Transparency = 0
                 end
             end
@@ -141,7 +141,7 @@ local PlayerGui = player:WaitForChild("PlayerGui", 10)
 if _G.GfarmLoop then task.cancel(_G.GfarmLoop) end
 
 _G.GingerbreadFarm = {active = false, waiting = false, farmingStarted = false}
-local SAFE_CFRAME = CFrame.new(-286.3, 40.5, -1628.2)
+local SAFE_CFRAME = CFrame.new(-287.3, 26.2, -1626.7)
 local collected = 0
 local lastRigCount = 0
 local countLabel
@@ -157,7 +157,7 @@ local function getRigs()
                 local root = obj:FindFirstChild("HumanoidRootPart") or obj.PrimaryPart
                 if root then
                     local offset = Vector3.new(math.random(-2,2), 3, math.random(-2,2))
-                    table.insert(rigs, root.CFrame + offset)
+                    table.insert(rigs, root.CFrame + offset ) 
                 end
             end
         end
@@ -184,6 +184,14 @@ local function startWaitingAnim()
         end
     end)
 end
+--
+--[[local co = coroutine.create(function()
+
+
+	 task.wait(2)
+
+end)]]
+
 
 
 _G.GfarmLoop = task.spawn(function()
@@ -193,7 +201,7 @@ _G.GfarmLoop = task.spawn(function()
 
         local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
         if not hrp then continue end
-        hrp.Anchored = true
+       hrp.Anchored = true
 
         local rigs = getRigs()
         local current = #rigs
@@ -221,8 +229,9 @@ _G.GfarmLoop = task.spawn(function()
             if nearest then tpTo(nearest) end
         else
             if not _G.GingerbreadFarm.waiting then
-                tpTo(SAFE_CFRAME)
-                _G.GingerbreadFarm.waiting = true
+ tpTo(SAFE_CFRAME)
+			-- TpAndWait()            
+                _G.GingerbreadFarm.waiting = true			
                 startWaitingAnim()
             end
         end
@@ -425,12 +434,13 @@ startBtn.MouseButton1Click:Connect(function()
         task.wait(1)
         for i = 4, 1, -1 do
             countLabel.Text = "Farm starts in " .. i .. "s..."
-            task.wait(1)
+            task.wait(0.5)
         end
-        collected = 0
+        collected = 0 
         lastRigCount = #getRigs()
+		 _G.GingerbreadFarm.waiting = false
         _G.GingerbreadFarm.farmingStarted = true
-        _G.GingerbreadFarm.waiting = false
+
   
         lastTextUpdate = tick()
     else
